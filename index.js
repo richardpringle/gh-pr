@@ -71,14 +71,14 @@ if (!base) {
 // post body
 const body = buildBody(title, bodyText, base);
 // options for https request
-const options = buildOptions(body);
+const options = buildRequestOptions(body);
 
 openPullRequest(body, options);
 
-if (other) {
+if (other && other.length) {
   other.forEach(base => {
     const body = buildBody(title, bodyText, base);
-    const options = buildOptions(body);
+    const options = buildRequestOptions(body);
     openPullRequest(body, options);
   });
 }
