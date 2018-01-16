@@ -62,37 +62,53 @@ try {
   console.error('~no-template~');
 }
 
-const base = process.argv[2];
+const [execPath, jsFilePath, base, ...other] = process.argv;
 if (!base) {
   console.error(`base branch specified: ${base}`);
   process.exit(1);
 }
 
 // post body
-const body = JSON.stringify({
-  title: title,
-  head: title,
-  body: bodyText,
-  base: base,
-});
-
+const body = buildBody(title, bodyText, base);
 // options for https request
-const options = {
-  hostname: 'api.github.com',
-  port: 443,
-  method: 'POST',
-  path: `/repos/${repo}/pulls`,
-  headers: {
-    'user-agent': 'pring',
-    Authorization: `token ${OAuthToken}`,
-    'Content-Type': 'application/json',
-    'Content-Length': Buffer.byteLength(body),
-  },
-};
+const options = buildOptions(body);
 
-openPullRequest();
+openPullRequest(body, options);
 
-function openPullRequest() {
+if (other) {
+  other.forEach(base => {
+    const body = buildBody(title, bodyText, base);
+    const options = buildOptions(body);
+    openPullRequest(body, options);
+  });
+}
+
+
+function buildBody(title, bodyText, base) {
+  return JSON.stringify({
+    title: title,
+    head: title,
+    body: bodyText,
+    base: base
+  });
+}
+
+function buildRequestOptions(body) {
+  return {
+    hostname: 'api.github.com',
+    port: 443,
+    method: 'POST',
+    path: `/repos/${repo}/pulls`,
+    headers: {
+      'user-agent': 'pring',
+      Authorization: `token ${OAuthToken}`,
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(body)
+    },
+  };
+}
+
+function openPullRequest(body, options) {
   const req = https.request(options, res => {
     console.log(res.statusCode);
     res.setEncoding('utf8');
