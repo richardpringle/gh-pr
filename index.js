@@ -48,7 +48,8 @@ rawGitConfig.forEach(([key, value]) => {
 const repo = gitConfig
   .get('url')
   .replace(/.*\:/, '')
-  .replace('.git', '');
+  .replace('.git', '')
+  .replace(/\/*github\.com\//, '');
 
 let bodyText = '';
 
@@ -100,7 +101,7 @@ function buildRequestOptions(body) {
     method: 'POST',
     path: `/repos/${repo}/pulls`,
     headers: {
-      'user-agent': 'pring',
+      'user-agent': 'https://github.com/richardpringle/gh-pr',
       Authorization: `token ${OAuthToken}`,
       'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(body)
